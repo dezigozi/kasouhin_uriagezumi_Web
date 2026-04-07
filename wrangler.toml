@@ -1,0 +1,5 @@
+# Cloudflare Pages（GitHub 連携時はダッシュボードの設定と揃える）
+# https://developers.cloudflare.com/pages/configuration/build-configuration/
+name = "kasouhin-uriagezumi-web"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "build"
