@@ -52,7 +52,14 @@ docker run -d -p 3001:3001 \
 | Framework preset | None |
 | Build command | `npm ci && npm run build`（または `npm run build:pages`。どちらも webpack のみで electron-builder は走りません） |
 | Build output directory | `build` |
+| **Deploy command** | **空欄（未設定）** |
 | Root directory | `/`（リポジトリルートがこのアプリのとき） |
+
+**Deploy command について（よくある失敗）**
+
+- Git と連携した **Cloudflare Pages** は、ビルドが成功すると **Build output directory（`build`）を自動で公開**します。追加のデプロイ処理は不要です。
+- ダッシュボードに **`npx wrangler deploy`** を入れると失敗します。`wrangler deploy` は **Workers** 向けで、このリポジトリの `wrangler.toml` には Worker の `main` もアセットの `[assets]` も無いためです。
+- 手元からだけ静的ファイルを載せ替えたいときは Pages 用の **`wrangler pages deploy`** を使います（例: `npx wrangler pages deploy build --project-name=kasouhin-uriagezumi-web`）。API トークン `CLOUDFLARE_API_TOKEN` が必要です。[Pages に直接アップロードする](https://developers.cloudflare.com/pages/get-started/direct-upload/) 手順も参照してください。
 
 3. **Environment variables（Production）** に少なくとも次を設定:
 
@@ -70,7 +77,7 @@ docker run -d -p 3001:3001 \
 
 ## 4. wrangler.toml
 
-リポジトリ直下の `wrangler.toml` は Pages プロジェクト名や出力ディレクトリのメモ用です。Git 連携の Pages ではダッシュボードの設定が優先されることが多いです。Wrangler CLI でデプロイする場合は [Pages のドキュメント](https://developers.cloudflare.com/pages/configuration/build-configuration/) に合わせてください。
+リポジトリ直下の `wrangler.toml` は **メモ・CLI 用**です。`pages_build_output_dir` は **Workers の `wrangler deploy` では使われません**。Git 連携 Pages の **Deploy command は空**にし、[ビルド設定](https://developers.cloudflare.com/pages/configuration/build-configuration/)の **Build output directory** で出力先を指定してください。
 
 ## 5. 社内ネットワークだけで見せる場合
 

@@ -1,5 +1,12 @@
-# Cloudflare Pages（GitHub 連携時はダッシュボードの設定と揃える）
+# Cloudflare Pages（Git 連携）向けメモ
 # https://developers.cloudflare.com/pages/configuration/build-configuration/
+#
+# 【重要】ダッシュボードの「Deploy command」は空にしてください。
+# 「npx wrangler deploy」は Workers 用です。このファイルだけでは deploy は成功しません。
+#
+# 手動アップロード例（Pages）:
+#   npx wrangler pages deploy build --project-name=kasouhin-uriagezumi-web
+#
 name = "kasouhin-uriagezumi-web"
 compatibility_date = "2025-01-01"
 pages_build_output_dir = "build"
