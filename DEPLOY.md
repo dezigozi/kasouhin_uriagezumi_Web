@@ -50,7 +50,7 @@ docker run -d -p 3001:3001 \
 | 項目 | 値 |
 |------|-----|
 | Framework preset | None |
-| Build command | `npm ci && npm run build:pages` |
+| Build command | `npm ci && npm run build`（または `npm run build:pages`。どちらも webpack のみで electron-builder は走りません） |
 | Build output directory | `build` |
 | Root directory | `/`（リポジトリルートがこのアプリのとき） |
 

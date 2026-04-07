@@ -9,8 +9,9 @@
     "dev:web": "concurrently \"npx webpack serve --mode development\" \"wait-on http://localhost:9000 && node server.js\"",
     "build:renderer": "npx webpack --mode production",
     "build:pages": "npx webpack --mode production",
-    "build": "npm run build:renderer && electron-builder",
-    "pack": "electron-builder --dir",
+    "build": "npm run build:renderer",
+    "build:electron": "npm run build:renderer && electron-builder",
+    "pack": "npm run build:renderer && electron-builder --dir",
     "start:web": "cross-env SERVE_STATIC=1 NODE_ENV=production node server.js"
   },
   "keywords": [],
