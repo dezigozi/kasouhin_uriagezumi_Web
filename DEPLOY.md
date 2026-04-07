@@ -42,26 +42,39 @@ docker run -d -p 3001:3001 \
 - 本番で API トークンを使う場合: コンテナに `LEASE_REPORT_API_TOKEN` を渡し、フロント側で `public/index.html` などに  
   `window.__LEASE_REPORT_API_TOKEN__ = '...'` を置くか、後述のビルド後スクリプトで注入してください。
 
-## 3. Cloudflare Pages の設定
+## 3. Cloudflare の設定（Pages と Workers のどちらか）
 
-1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git** で上記 GitHub リポジトリを選択。
-2. ビルド設定の例:
+このリポジトリは **静的フロント（`build/`）** なので、Cloudflare では次のどちらかです。
+
+### A. Cloudflare **Pages**（推奨・シンプル）
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages**（※「Workers」ではなく **Pages**）→ **Connect to Git**。
+2. ビルド設定:
 
 | 項目 | 値 |
 |------|-----|
-| Framework preset | None |
-| Build command | `npm ci && npm run build`（または `npm run build:pages`。どちらも webpack のみで electron-builder は走りません） |
+| Build command | `npm ci && npm run build` |
 | Build output directory | `build` |
-| **Deploy command** | **空欄（未設定）** |
-| Root directory | `/`（リポジトリルートがこのアプリのとき） |
+| **Deploy command** | **空欄** |
+| Root directory | `/` |
 
-**Deploy command について（よくある失敗）**
+### B. いまのように **Workers の Git 連携**（Build 画面に Deploy command があるタイプ）
 
-- Git と連携した **Cloudflare Pages** は、ビルドが成功すると **Build output directory（`build`）を自動で公開**します。追加のデプロイ処理は不要です。
-- ダッシュボードに **`npx wrangler deploy`** を入れると失敗します。`wrangler deploy` は **Workers** 向けで、このリポジトリの `wrangler.toml` には Worker の `main` もアセットの `[assets]` も無いためです。
-- 手元からだけ静的ファイルを載せ替えたいときは Pages 用の **`wrangler pages deploy`** を使います（例: `npx wrangler pages deploy build --project-name=kasouhin-uriagezumi-web`）。API トークン `CLOUDFLARE_API_TOKEN` が必要です。[Pages に直接アップロードする](https://developers.cloudflare.com/pages/get-started/direct-upload/) 手順も参照してください。
+ダッシュボードの **Runtime → Build** で次を確認します。
 
-3. **Environment variables（Production）** に少なくとも次を設定:
+| 項目 | 値 |
+|------|-----|
+| Build command | `npm run build`（または `npm ci && npm run build`） |
+| Deploy command | `npx wrangler deploy`（そのままで可） |
+| Root directory | `/` |
+
+リポジトリの **`wrangler.toml`** で **`name`** を Workers プロジェクトの **Name**（例: `kasouhinuriagezumiweb`）と **完全一致**させ、`[assets]` で **`./build`** を指定します（このリポジトリに同梱済み）。SPA のため `not_found_handling = "single-page-application"` を付けています。詳細は [Workers Static Assets / SPA](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application) を参照。
+
+**Pages 用の `wrangler pages deploy`** を CLI で使う例: `npx wrangler pages deploy build --project-name=<Pages のプロジェクト名>`（[Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/)）。
+
+3. **Variables and secrets**（ダッシュボードの **Settings** 付近）で **ビルド時**に参照する変数を追加します。Cloudflare の **Workers** 連携では「Environment variables」ではなく **Variables and secrets** に出ることがあります。
+
+**Production** に少なくとも次を設定:
 
 | Name | 例 |
 |------|-----|
@@ -77,7 +90,8 @@ docker run -d -p 3001:3001 \
 
 ## 4. wrangler.toml
 
-リポジトリ直下の `wrangler.toml` は **メモ・CLI 用**です。`pages_build_output_dir` は **Workers の `wrangler deploy` では使われません**。Git 連携 Pages の **Deploy command は空**にし、[ビルド設定](https://developers.cloudflare.com/pages/configuration/build-configuration/)の **Build output directory** で出力先を指定してください。
+- **Workers + `npx wrangler deploy`**: リポジトリの `wrangler.toml` がそのまま使われます（`name` と `[assets].directory = "./build"`）。
+- **Pages**: **Deploy command は空**。`wrangler.toml` は必須ではありません（参考用）。
 
 ## 5. 社内ネットワークだけで見せる場合
 
